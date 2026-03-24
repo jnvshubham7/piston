@@ -1,6 +1,6 @@
 services:
     api:
-        image: piston:arm64
+        image: piston_api:arm64
         platform: linux/arm64
         container_name: piston_api
         restart: always
