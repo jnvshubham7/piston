@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+source /arch-detect.sh
+machine=$(uname -m)
+
+# Put instructions to compile source code, remove this file if the language does not require this stage
+
+case "${PISTON_LANGUAGE}" in
+    nasm)
+        case "$machine" in
+            x86_64)
+                nasm -f elf32 -o binary.o "$@"
+                ld -m elf_i386 binary.o -o binary
+                ;;
+            aarch64|arm64)
+                echo "32-bit x86 NASM assembly is not supported on ARM64"
+                exit 1
+                ;;
+            *)
+                echo "Unsupported architecture for NASM"
+                exit 1
+                ;;
+        esac
+        ;;
+    nasm64)
+        case "$machine" in
+            x86_64)
+                nasm -f elf64 -o binary.o "$@"
+                ld -m elf_x86_64 binary.o -o binary
+                ;;
+            aarch64|arm64)
+                echo "x86_64 NASM assembly is not supported on ARM64"
+                exit 1
+                ;;
+            *)
+                echo "Unsupported architecture for NASM"
+                exit 1
+                ;;
+        esac
+        ;;
+    *)
+        echo "How did you get here? (${PISTON_LANGUAGE})"
+        exit 1
+        ;;
+esac
+
+chmod +x ./binary

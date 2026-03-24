@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+source /arch-detect.sh
+architecture=$(get_arch_long)
+
+# https://stackoverflow.com/questions/38041331/rust-compiler-cant-find-crate-for-std
+# Rust compiler needs to find the stdlib to link against
+# Dynamically find the rust-std directory for the current architecture
+RUST_STD_PATH="${RUST_INSTALL_LOC}/rust-std-${architecture}/lib/rustlib/${architecture}/lib"
+rustc -o binary -L ${RUST_INSTALL_LOC}/rustc/lib -L ${RUST_STD_PATH} "$@"
+chmod +x binary

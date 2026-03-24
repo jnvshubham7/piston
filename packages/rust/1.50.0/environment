@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+source /arch-detect.sh
+architecture=$(get_arch_long)
+# Put 'export' statements here for environment variables
+export PATH=$PWD/rust-1.50.0-${architecture}/rustc/bin/:$PATH
+export RUST_INSTALL_LOC=$PWD/rust-1.50.0-${architecture}
