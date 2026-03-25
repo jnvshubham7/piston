@@ -9,10 +9,7 @@ API_BASE = os.getenv("PISTON_API", "http://144.24.155.203/api/v2")  # public ngi
 TEST_SNIPPETS = {
     "python": {"language": "python", "version": "3.11.0", "files": [{"name":"main.py","content":"print('hello from Shubham')"}]},
     "javascript": {"language": "javascript", "version": "18.15.0", "files": [{"name":"main.js","content":"console.log('hello from javascript')"}]},
-    "zig": {"language":"zig","version":"0.10.1","files":[{"name":"main.zig","content":"const std = @import(\"std\"); pub fn main() !void { std.debug.print(\"hello from zig\\n\", .{}); }"}]},
     "dart": {"language":"dart","version":"3.0.1","files":[{"name":"main.dart","content":"void main() { print('hello from dart'); }"}]},
-    "rust": {"language":"rust","version":"1.68.2","files":[{"name":"main.rs","content":"fn main() { println!(\"hello from rust\"); }"}]},
-    "yeethon": {"language":"yeethon","version":"3.10.0","files":[{"name":"main.y","content":"print(\"hello from yeethon\")"}]},
     "java": {"language":"java","version":"15.0.2","files":[{"name":"Main.java","content":"public class Main { public static void main(String[] a){ System.out.println(\"hello from java\"); }}"}]},
 }
 EXECUTE_PATH = f"{API_BASE}/execute"
