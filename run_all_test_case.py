@@ -7,7 +7,7 @@ import os
 
 API_BASE = os.getenv("PISTON_API", "http://144.24.155.203/api/v2")  # public nginx URL
 TEST_SNIPPETS = {
-    "python": {"language": "python", "version": "3.11.0", "files": [{"name":"main.py","content":"print('hello from outside via nginx')"}]},
+    "python": {"language": "python", "version": "3.11.0", "files": [{"name":"main.py","content":"print('hello from Shubham')"}]},
     "javascript": {"language": "javascript", "version": "18.15.0", "files": [{"name":"main.js","content":"console.log('hello from javascript')"}]},
     "zig": {"language":"zig","version":"0.10.1","files":[{"name":"main.zig","content":"const std = @import(\"std\"); pub fn main() !void { std.debug.print(\"hello from zig\\n\", .{}); }"}]},
     "dart": {"language":"dart","version":"3.0.1","files":[{"name":"main.dart","content":"void main() { print('hello from dart'); }"}]},
