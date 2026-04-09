@@ -1,3 +1,2 @@
 #!/bin/bash
-
-node "$@"
+exec "$(pwd)/bin/node" "$@"

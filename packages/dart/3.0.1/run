@@ -1,4 +1,2 @@
 #!/usr/bin/env bash
-
-# Put instructions to run the runtime
-dart run "$@"
+exec "$(pwd)/bin/dart" run "$@"
