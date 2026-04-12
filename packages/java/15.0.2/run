@@ -2,4 +2,6 @@
 mv "$1" "$1.java"
 filename="$1.java"
 shift
-exec "$(pwd)/bin/java" "$filename" "$@"
+# Resolve the script directory and execute the java binary from package `bin`
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd -P)"
+exec "$SCRIPT_DIR/bin/java" "$filename" "$@"
