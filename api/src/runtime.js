@@ -4,8 +4,100 @@ const config = require('./config');
 const globals = require('./globals');
 const fss = require('fs');
 const path = require('path');
+const os = require('os');
 
 const runtimes = [];
+
+const ELF_MACHINE_IDS = {
+    0x03: 'x86',
+    0x3e: 'x86_64',
+    0x28: 'arm',
+    0xb7: 'arm64',
+    0xf3: 'riscv',
+};
+
+function getHostArchitecture() {
+    const arch = os.arch();
+    switch (arch) {
+        case 'x64':
+            return 'x86_64';
+        case 'arm64':
+            return 'arm64';
+        case 'arm':
+            return 'arm';
+        default:
+            return arch;
+    }
+}
+
+function parseElfArchitecture(filePath) {
+    const fd = fss.openSync(filePath, 'r');
+    const header = Buffer.alloc(20);
+    fss.readSync(fd, header, 0, 20, 0);
+    fss.closeSync(fd);
+
+    if (header[0] !== 0x7f || header.toString('ascii', 1, 4) !== 'ELF') {
+        return null;
+    }
+
+    const littleEndian = header[5] === 1;
+    const machine = littleEndian
+        ? header.readUInt16LE(18)
+        : header.readUInt16BE(18);
+
+    return ELF_MACHINE_IDS[machine] || null;
+}
+
+function extractRunBinaryPath(packageDir) {
+    const runPath = path.join(packageDir, 'run');
+    if (!fss.existsSync(runPath)) {
+        return null;
+    }
+
+    const content = fss.readFileSync(runPath, 'utf8');
+    const match = content.match(/exec\s+["']?\$\(pwd\)\/bin\/([^"'\s]+)/);
+    if (!match) {
+        return null;
+    }
+
+    return path.join(packageDir, 'bin', match[1]);
+}
+
+function detectPackageArchitecture(packageDir) {
+    const runBinary = extractRunBinaryPath(packageDir);
+    if (runBinary && fss.existsSync(runBinary)) {
+        const arch = parseElfArchitecture(runBinary);
+        if (arch) {
+            return arch;
+        }
+    }
+
+    const binDir = path.join(packageDir, 'bin');
+    if (fss.existsSync(binDir) && fss.statSync(binDir).isDirectory()) {
+        for (const fileName of fss.readdirSync(binDir)) {
+            const candidate = path.join(binDir, fileName);
+            if (!fss.statSync(candidate).isFile()) {
+                continue;
+            }
+
+            const arch = parseElfArchitecture(candidate);
+            if (arch) {
+                return arch;
+            }
+        }
+    }
+
+    return null;
+}
+
+function isPackageCompatibleWithHost(packageDir) {
+    const packageArch = detectPackageArchitecture(packageDir);
+    if (!packageArch) {
+        return true;
+    }
+
+    return packageArch === getHostArchitecture();
+}
 
 class Runtime {
     constructor({
@@ -125,6 +217,15 @@ class Runtime {
             limit_overrides,
         } = info;
         version = semver.parse(version);
+
+        if (!isPackageCompatibleWithHost(package_dir)) {
+            const packageArch = detectPackageArchitecture(package_dir) || 'unknown';
+            const hostArch = getHostArchitecture();
+            logger.warn(
+                `Skipping ${language}-${version} because package architecture ${packageArch} does not match host architecture ${hostArch}`
+            );
+            return;
+        }
 
         if (build_platform !== globals.platform) {
             logger.warn(
